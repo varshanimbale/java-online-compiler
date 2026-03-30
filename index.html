@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Java Online Compiler</title>
+
+    <!-- Monaco Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #1e1e1e;
+            color: white;
+        }
+
+        header {
+            background: #2d2d2d;
+            padding: 10px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .container {
+            display: flex;
+            height: 90vh;
+        }
+
+        #editor {
+            width: 60%;
+            height: 100%;
+        }
+
+        .right-panel {
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .controls {
+            padding: 10px;
+            background: #2d2d2d;
+        }
+
+        button {
+            padding: 8px 15px;
+            background: #007acc;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #005f99;
+        }
+
+        textarea {
+            background: black;
+            color: white;
+            padding: 10px;
+            border: none;
+            resize: none;
+        }
+
+        #input {
+            height: 100px;
+        }
+
+        #output {
+            flex: 1;
+            background: black;
+            padding: 10px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>🚀 Java Online Compiler</header>
+
+<div class="container">
+
+    <!-- Editor -->
+    <div id="editor"></div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+        
+        <div class="controls">
+            <button onclick="runCode()">▶ Run Code</button>
+        </div>
+
+        <!-- INPUT -->
+        <textarea id="input" placeholder="Enter input here..."></textarea>
+
+        <!-- OUTPUT -->
+        <div id="output">Output will appear here...</div>
+
+    </div>
+
+</div>
+
+<script>
+    let editor;
+
+    require.config({
+        paths: {
+            'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs'
+        }
+    });
+
+    require(["vs/editor/editor.main"], function () {
+        editor = monaco.editor.create(document.getElementById("editor"), {
+            value: `import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int a = sc.nextInt();
+        System.out.println(a * 2);
+    }
+}`,
+            language: "java",
+            theme: "vs-dark"
+        });
+    });
+
+    function runCode() {
+        const code = editor.getValue();
+        const input = document.getElementById("input").value;
+
+        document.getElementById("output").innerText = "Running...";
+
+        fetch("http://localhost:2727/run", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                code: code,
+                input: input
+            })
+        })
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById("output").innerText = data;
+        })
+        .catch(err => {
+            document.getElementById("output").innerText = "Error: " + err;
+        });
+    }
+</script>
+
+</body>
+</html>
